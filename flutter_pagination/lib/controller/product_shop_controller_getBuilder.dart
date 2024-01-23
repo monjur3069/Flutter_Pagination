@@ -17,6 +17,11 @@ class ProductShopController extends GetxController {
     _currentPage = newValue;
   }
 
+  bool isFirst = true;
+  late ScrollController scrollController;
+  RefreshController refreshController =
+  RefreshController(initialRefresh: false);
+
   bool get hasDataLoaded => productShopModel != null;
 
   getAllData() {
@@ -25,8 +30,23 @@ class ProductShopController extends GetxController {
     _getShopData();
   }
 
+  Future<void> onRefresh() async {
+    currentPage = 1;
+    await getAllData();
+    refreshController.refreshCompleted();
+    if (currentPage == totalPages) {
+      refreshController.loadNoData();
+    }
+  }
 
-
+  void _scrollListener() {
+    if (scrollController.offset >=
+        scrollController.position.maxScrollExtent &&
+        !scrollController.position.outOfRange) {
+      // Reached the end of the current page, fetch next page data
+      getAllData();
+    }
+  }
 
   void _getShopData() async {
     final uri = Uri.parse(
@@ -56,5 +76,27 @@ class ProductShopController extends GetxController {
     }finally {
       isLoading = false;
     }
+  }
+
+
+
+  @override
+  void onInit() {
+    scrollController = ScrollController();
+    scrollController.addListener(_scrollListener);
+    if (isFirst) {
+      getAllData();
+      isFirst = false;
+    }
+    super.onInit();
+  }
+
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_scrollListener);
+    scrollController.dispose();
+    refreshController.dispose();
+    super.dispose();
   }
 }

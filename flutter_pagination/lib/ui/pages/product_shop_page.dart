@@ -10,44 +10,7 @@ class ProductShopPage extends StatefulWidget {
 
 class _ProductShopPageState extends State<ProductShopPage> {
   ProductShopController controller = Get.put(ProductShopController());
-  bool isFirst = true;
 
-  late ScrollController _scrollController;
-  RefreshController _refreshController =
-  RefreshController(initialRefresh: false);
-
-  @override
-  void initState() {
-    _scrollController = ScrollController();
-    _scrollController.addListener(_scrollListener);
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _scrollController.removeListener(_scrollListener);
-    _scrollController.dispose();
-    _refreshController.dispose();
-    super.dispose();
-  }
-
-  void _scrollListener() {
-    if (_scrollController.offset >=
-        _scrollController.position.maxScrollExtent &&
-        !_scrollController.position.outOfRange) {
-      // Reached the end of the current page, fetch next page data
-      controller.getAllData();
-    }
-  }
-
-  @override
-  void didChangeDependencies() async {
-    if (isFirst) {
-      controller.getAllData();
-      isFirst = false;
-    }
-    super.didChangeDependencies();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -60,12 +23,14 @@ class _ProductShopPageState extends State<ProductShopPage> {
         builder: (context) =>
         controller.hasDataLoaded
             ? SmartRefresher(
-          controller: _refreshController,
+          controller: controller.refreshController,
           enablePullDown: true,
           enablePullUp: false,
-          onRefresh: _onRefresh,
+          onRefresh: ()async{
+              await controller.onRefresh();
+            },
           child: ListView.builder(
-            controller: _scrollController,
+            controller: controller.scrollController,
             itemCount:
             controller.productShopModel!.data!.length + 1, // +1 for the progress indicator
             itemBuilder: (context, index) {
@@ -88,12 +53,4 @@ class _ProductShopPageState extends State<ProductShopPage> {
     );
   }
 
-  void _onRefresh() async {
-    controller.currentPage = 1;
-    await controller.getAllData();
-    _refreshController.refreshCompleted();
-    if (controller.currentPage == controller.totalPages) {
-      _refreshController.loadNoData();
-    }
-  }
 }
