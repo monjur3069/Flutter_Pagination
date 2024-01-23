@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_pagination/provider/popular_movie_provider.dart';
-import 'package:flutter_pagination/ui/pages/popular_movie_page.dart';
+import 'package:flutter_pagination/ui/pages/popular_movie_page_getBuilder.dart';
+import 'package:flutter_pagination/ui/pages/product_shop_page.dart';
+import 'package:get/get.dart';
 import 'package:provider/provider.dart';
 
 
@@ -11,6 +13,7 @@ void main() {
       create: (_) => PopularMovieProvider(),
     ),
   ], child: const MyApp()));
+  // runApp(const MyApp());
 }
 
 class MyApp extends StatelessWidget {
@@ -18,7 +21,7 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return GetMaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
